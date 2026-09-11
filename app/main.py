@@ -105,7 +105,18 @@ def create_app(
 
         try:
             recipe = await app.state.spoonacular.get_recipe_detail(int(recipe_id))
-            return {"recipe": asdict(recipe)}
+            return {
+                "recipe": {
+                    "id": recipe.id,
+                    "title": recipe.title,
+                    "image": recipe.image,
+                    "servings": recipe.servings,
+                    "readyInMinutes": recipe.ready_in_minutes,
+                    "sourceUrl": recipe.source_url,
+                    "ingredients": recipe.ingredients,
+                    "instructions": recipe.instructions,
+                }
+            }
         except RuntimeError as e:
             if str(e) == "Recipe not found.":
                 return JSONResponse(status_code=404, content={"error": str(e)})
@@ -180,7 +191,17 @@ def create_app(
             "resolvedIngredients": result.resolved_ingredients,
         }
         if external is not None:
-            response["external"] = [asdict(e) for e in external]
+            response["external"] = [
+                {
+                    "id": e.id,
+                    "title": e.title,
+                    "image": e.image,
+                    "matchedCount": e.matched_count,
+                    "missingCount": e.missing_count,
+                    "source": e.source,
+                }
+                for e in external
+            ]
         if external_error:
             response["externalError"] = external_error
 
